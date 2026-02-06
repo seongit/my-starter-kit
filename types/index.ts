@@ -22,12 +22,53 @@ export interface PropsWithClassName {
 }
 
 /**
- * API 응답의 기본 구조
+ * API 성공 응답
  */
-export interface ApiResponse<T> {
+export interface ApiSuccessResponse<T> {
   data: T;
-  success: boolean;
+  success: true;
   message?: string;
+}
+
+/**
+ * API 에러 정보
+ */
+export interface ApiErrorInfo {
+  code: string;
+  message: string;
+  details?: Record<string, string[]>;
+}
+
+/**
+ * API 에러 응답
+ */
+export interface ApiErrorResponse {
+  success: false;
+  error: ApiErrorInfo;
+}
+
+/**
+ * API 응답 유니온 타입
+ * 성공/실패를 명확히 구분
+ */
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+/**
+ * API 성공 응답 타입 가드
+ */
+export function isApiSuccess<T>(
+  response: ApiResponse<T>
+): response is ApiSuccessResponse<T> {
+  return response.success === true;
+}
+
+/**
+ * API 에러 응답 타입 가드
+ */
+export function isApiError<T>(
+  response: ApiResponse<T>
+): response is ApiErrorResponse {
+  return response.success === false;
 }
 
 /**
@@ -41,20 +82,16 @@ export interface Pagination {
 }
 
 /**
- * 페이지네이션이 포함된 API 응답
+ * 페이지네이션이 포함된 API 성공 응답
  */
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+export interface PaginatedResponse<T> extends ApiSuccessResponse<T[]> {
   pagination: Pagination;
 }
 
 /**
- * API 에러 응답
+ * @deprecated ApiErrorInfo를 사용하세요
  */
-export interface ApiError {
-  code: string;
-  message: string;
-  details?: Record<string, string[]>;
-}
+export type ApiError = ApiErrorInfo;
 
 /**
  * 비동기 상태 관리 타입
